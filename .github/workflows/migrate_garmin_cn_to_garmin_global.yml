@@ -3,7 +3,6 @@ name: Migrate Garmin CN to Garmin Global
 on:
   workflow_dispatch:
 
-#  并发控制：迁移任务不允许多个同时运行
 concurrency:
   group: migrate-cn-to-global
   cancel-in-progress: false
@@ -18,7 +17,7 @@ env:
   GARMIN_MIGRATE_START: ${{ secrets.GARMIN_MIGRATE_START }}
 
 jobs:
-  build:
+  migrate:
     runs-on: ubuntu-latest
     name: Migrate Garmin CN to Garmin Global
     timeout-minutes: 30
@@ -26,23 +25,24 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'yarn'
+
       - run: yarn install --frozen-lockfile
-      - run: yarn migrate_garmin_cn_to_global
+
+      - name: Run migration
+        run: yarn migrate_garmin_cn_to_global
 
       - name: Save Garmin Session
         if: success()
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "Save Garmin Session [skip ci]"
+          commit_message: "chore: save garmin session [skip ci]"
 
-      #  失败时通过 Bark 推送通知
       - name: Notify failure via Bark
-        if: failure()
+        if: failure() && env.BARK_KEY != ''
         run: |
-          if [ -n "$BARK_KEY" ]; then
-            curl -s "https://api.day.app/${BARK_KEY}/Garmin迁移失败-CN到Global/迁移任务执行失败❌?group=Garmin&sound=alert"
-          fi
+          curl -s "https://api.day.app/${BARK_KEY}/Garmin迁移失败-CN到Global/迁移任务执行失败?group=Garmin&sound=alert&icon=https://github.com/actions.png"
