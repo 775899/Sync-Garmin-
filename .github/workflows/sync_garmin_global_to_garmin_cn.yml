@@ -1,0 +1,65 @@
+name: Sync Garmin Global to Garmin CN
+
+on:
+  workflow_dispatch:
+  schedule:
+    #  每6小时检查一次
+    - cron: "0 */6 * * *"
+
+#  并发控制：同一时间只允许一个同步任务运行
+concurrency:
+  group: sync-global-to-cn
+  cancel-in-progress: true
+
+env:
+  RQ_COOKIE: ${{ secrets.RQ_COOKIE }}
+  RQ_CSRF_TOKEN: ${{ secrets.RQ_CSRF_TOKEN }}
+  RQ_USERID: ${{ secrets.RQ_USERID }}
+  GOOGLE_SHEET_ID: ${{ secrets.GOOGLE_SHEET_ID }}
+  GOOGLE_API_CLIENT_EMAIL: ${{ secrets.GOOGLE_API_CLIENT_EMAIL }}
+  GOOGLE_API_PRIVATE_KEY: ${{ secrets.GOOGLE_API_PRIVATE_KEY }}
+  BARK_KEY: ${{ secrets.BARK_KEY }}
+  GARMIN_USERNAME: ${{ secrets.GARMIN_USERNAME }}
+  GARMIN_PASSWORD: ${{ secrets.GARMIN_PASSWORD }}
+  GARMIN_GLOBAL_USERNAME: ${{ secrets.GARMIN_GLOBAL_USERNAME }}
+  GARMIN_GLOBAL_PASSWORD: ${{ secrets.GARMIN_GLOBAL_PASSWORD }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Sync Garmin Global to Garmin CN
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+      - run: yarn install --frozen-lockfile
+
+      #  随机延迟 0-120 秒
+      - name: Random delay
+        run: |
+          DELAY=$((RANDOM % 120))
+          echo "Waiting ${DELAY} seconds..."
+          sleep $DELAY
+
+      - name: Run sync
+        run: yarn sync_global
+        timeout-minutes: 5
+
+      - name: Save Garmin Session
+        if: success()
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Save Garmin Session [skip ci]"
+
+      #  失败时通过 Bark 推送通知
+      - name: Notify failure via Bark
+        if: failure()
+        run: |
+          if [ -n "$BARK_KEY" ]; then
+            curl -s "https://api.day.app/${BARK_KEY}/Garmin同步失败-Global到CN/同步任务执行失败❌?group=Garmin&sound=alert"
+          fi
