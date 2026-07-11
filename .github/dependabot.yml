@@ -1,10 +1,6 @@
-#  Dependabot 配置 - 自动检测和更新依赖
-#  文件路径: .github/dependabot.yml
-
 version: 2
 
 updates:
-  #  npm 依赖更新
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -16,18 +12,13 @@ updates:
       - "npm"
     commit-message:
       prefix: "deps"
-    #  分组更新，减少 PR 数量
     groups:
       typescript:
         patterns:
           - "typescript"
           - "ts-node"
           - "@types/*"
-      testing:
-        patterns:
-          - "nodemon"
 
-  #  GitHub Actions 版本更新
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -39,7 +30,6 @@ updates:
     commit-message:
       prefix: "ci"
 
-  #  Docker 基础镜像更新
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
