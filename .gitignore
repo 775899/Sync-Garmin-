@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.yarn/
+
+# Build output
+dist/
+build/
+
+# Runtime data
+*.log
+yarn-error.log
+garmin_fit_files/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+config.yaml
+
+# Database (session files are committed by CI, but local DB should be ignored)
+db/*.db
+db/*.db-journal
+db/*.db-wal
+db/*.db-shm
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Python (if used for tooling)
+__pycache__/
+*.pyc
+.mypy_cache
+pyvenv.cfg
+bin/
+include/
+lib/
+
+# Misc
+.cache/
+.sass-cache/
+_posts/
+_site/
+public/
