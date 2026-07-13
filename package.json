@@ -19,7 +19,7 @@
   "author": "yanzhitao",
   "license": "GPL-3.0",
   "dependencies": {
-    "@actions/core": "^1.10.0",
+    "@actions/core": "^3.0.1",
     "@gooin/garmin-connect": "^1.6.1",
     "axios": "^0.24.0",
     "crypto-js": "^4.1.1",
