@@ -41,7 +41,7 @@ jobs:
           echo "Waiting ${DELAY}s to avoid rate limit..."
           sleep $DELAY
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: 'yarn'
